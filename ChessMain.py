@@ -65,12 +65,11 @@ def main():
                     if len(playerClicks) == 2:
                         move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
                         for i in range(len(validMoves)):
+                            tempMove = validMoves[i]
                             if move == validMoves[i]:
-                                tempMove = validMoves[i]
                                 if move.isPawnPromotion == True:
-                                    user_input = input("Promote to Q/N/R/B (If nothing is entered, default is Q):")
-                                    if user_input == "N" or user_input == "R" or user_input == "B":
-                                        move.promotionChoice = user_input
+                                    tempMove.promotionChoice = promotion(move,screen)
+
 
                                 gs.makeMove(tempMove)
                                 moveMade = True
@@ -93,6 +92,8 @@ def main():
                     playerClicks = []
                     moveMade = False
                     gameOver = False
+                if e.key == p.K_t: # Test
+                    pass
         ## Chess AI
         if not gameOver and not isHumanTurn:
             AIMove = ai.findBestMove(gs, validMoves)
@@ -129,8 +130,8 @@ def drawGameState(screen, gs, validMoves, sqSelected,moveLogFont):
     highlightSquares(screen, gs, validMoves, sqSelected)
     drawPieces(screen,gs.board)
     drawMoveLog(screen,gs,moveLogFont)
-def drawBoard(screen):
 
+def drawBoard(screen):
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             color = colors[((r+c)%2)]
@@ -151,7 +152,7 @@ def highlightSquares(screen, gs, validMoves, sqSelected):
                     if move.pieceCaptured == "--":
                         s.fill(p.Color("green"))
                         s.set_alpha(50)
-                        screen.blit(s, (move.endCol*SQ_SIZE, move.endRow*SQ_SIZE))
+                        screen.blit(s, (move.endCol * SQ_SIZE, move.endRow * SQ_SIZE))
                     else:
                         s.fill(p.Color("red"))
                         s.set_alpha(75)
@@ -203,7 +204,7 @@ def drawMoveLog(screen,gs,font):
 def animateMove(move,screen,board,clock):
     deltaR = move.endRow - move.startRow
     deltaC = move.endCol - move.startCol
-    framesPerSquare = 150 // (abs(deltaR) + abs(deltaC))
+    framesPerSquare = 120 // (abs(deltaR) + abs(deltaC))
 
     frameCount = (abs(deltaR) + abs(deltaC)) * framesPerSquare
     for frame in range(frameCount + 1):
@@ -221,6 +222,59 @@ def animateMove(move,screen,board,clock):
             screen.blit(IMAGES[move.pieceCaptured], endSquare)
         screen.blit(IMAGES[move.pieceMoved], p.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
         p.display.flip()
+## Promotion Choice
+def promotion(move,screen):
+    c = move.endCol
+    r = move.endRow
+    promotionChoice = "Q"
+    whiteToPromote = True
+    if r == 0: # white promote
+        promotionChoices = ["wQ","wN","wR","wB"]
+        for i in range(0,4):
+            color = colors[((i + c) % 2)]
+            p.draw.rect(screen, color, p.Rect(c * SQ_SIZE, (r + i) * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+            s = p.Surface((SQ_SIZE, SQ_SIZE))
+            s.fill(p.Color("green"))
+            s.set_alpha(30)
+            screen.blit(s, (c * SQ_SIZE, (r + i) * SQ_SIZE))
+            screen.blit(IMAGES[promotionChoices[i]], p.Rect(c * SQ_SIZE, (r+i) * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
+    else: # black promote
+        promotionChoices = ["bQ", "bN", "bR", "bB"]
+        whiteToPromote = False
+        for i in range(0, 4):
+            color = colors[((i + c) % 2)]
+            p.draw.rect(screen, color, p.Rect(c * SQ_SIZE, (r - i) * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+            s = p.Surface((SQ_SIZE, SQ_SIZE))
+            s.fill(p.Color("green"))
+            s.set_alpha(30)
+            screen.blit(s, (c * SQ_SIZE, (r - i) * SQ_SIZE))
+            screen.blit(IMAGES[promotionChoices[i]], p.Rect(c * SQ_SIZE, (r - i) * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+    p.display.flip()
+
+    decisionNotMade = True
+    while decisionNotMade:
+        for e in p.event.get():
+            if e.type == p.QUIT:
+                decisionNotMade = False
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos()  # (x, y)
+                col = location[0] // SQ_SIZE
+                row = location[1] // SQ_SIZE
+                if c == col:
+                    if (row == 0 and whiteToPromote) or (row == 7 and not whiteToPromote):
+                        promotionChoice = "Q"
+                    elif (row == 1 and whiteToPromote) or (row == 6 and not whiteToPromote):
+                        promotionChoice = "N"
+                    elif (row == 2 and whiteToPromote) or (row == 5 and not whiteToPromote):
+                        promotionChoice = "R"
+                    elif (row == 3 and whiteToPromote) or (row == 4 and not whiteToPromote):
+                        promotionChoice = "B"
+                    else:
+                        continue
+                    decisionNotMade = False
+    return promotionChoice
+
 
 if __name__ == "__main__":
     main()
