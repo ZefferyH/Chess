@@ -1,0 +1,1 @@
+1. To move, type e2(starting square) e4(ending square). No NBRQK is used. If you want to play Ng1-f3, type g1f3.
