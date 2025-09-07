@@ -1,4 +1,5 @@
-Chess in different programming languages\n
+Chess in different programming languages
+
 Rules Implemented:
 1. Normal Moves
 2. Captures
@@ -9,4 +10,5 @@ Rules Implemented:
 7. En-Passant
 8. Promotion, underpromotion
 9. Play Again
+
 Rules not Implemented: 3-fold, 50 moves rule
