@@ -1,4 +1,4 @@
-Chess in different programming languages
+Chess in different programming languages\n
 Rules Implemented:
 1. Normal Moves
 2. Captures
